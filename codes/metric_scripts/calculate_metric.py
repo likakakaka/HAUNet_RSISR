@@ -7,7 +7,7 @@ import math
 import numpy as np
 import cv2
 import glob
-
+from sewar.full_ref import sam, uqi, scc
 
 def main():
     # Configurations
@@ -23,6 +23,10 @@ def main():
 
     PSNR_all = []
     SSIM_all = []
+    SAM_all = []
+    QI_all = []
+    SCC_all = []
+
     img_list = sorted(glob.glob(folder_GT + '/*'))
 
     if test_Y:
@@ -61,14 +65,25 @@ def main():
         PSNR = calculate_rgb_psnr(cropped_GT * 255, cropped_Gen * 255)
 
         SSIM = calculate_ssim(cropped_GT * 255, cropped_Gen * 255)
-        print('{:3d} - {:25}. \tPSNR: {:.6f} dB, \tSSIM: {:.6f}'.format(
-            i + 1, base_name, PSNR, SSIM))
+        SAM = sam(cropped_GT * 255, cropped_Gen * 255)
+        QI = uqi(cropped_GT * 255, cropped_Gen * 255)
+        SCC = scc(cropped_GT * 255, cropped_Gen * 255)
+
+        print('{:3d} - {:25}. \tPSNR: {:.6f} dB, \tSSIM: {:.6f}, \tSAM: {:.6f}, \tQI: {:.6f}, \tSCC: {:.6f}'.format(
+            i + 1, base_name, PSNR, SSIM, SAM, QI, SCC))
         PSNR_all.append(PSNR)
         SSIM_all.append(SSIM)
+        SAM_all.append(SAM)
+        QI_all.append(QI)
+        SCC_all.append(SCC)
 
-    print('Average: PSNR: {:.6f} dB, SSIM: {:.6f}'.format(
+    print('Average: PSNR: {:.6f} dB, SSIM: {:.6f}, SAM: {:.6f}, QI: {:.6f}, SCC: {:.6f}'.format(
         sum(PSNR_all) / len(PSNR_all),
-        sum(SSIM_all) / len(SSIM_all)))
+        sum(SSIM_all) / len(SSIM_all),
+        sum(SAM_all) / len(SAM_all),
+        sum(QI_all) / len(QI_all),
+        sum(SCC_all) / len(SCC_all),
+    ))
 
 def calculate_psnr(img1, img2):
     # img1 and img2 have range [0, 255]
